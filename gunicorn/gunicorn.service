@@ -1,13 +1,25 @@
 [Unit]
-Description=Gunicorn instance to serve my application
+Description=gunicorn daemon
+Requires=gunicorn.socket
 After=network.target
 
 [Service]
-User=your_user
+User=k9377437
 Group=www-data
-WorkingDirectory=/path/to/your/application
-Environment="PATH=/path/to/your/venv/bin"
-ExecStart=/path/to/your/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/path/to/your/application.sock wsgi:app
+WorkingDirectory=/home/k9377437/business_apps
+Environment="DJANGO_ENV=production"
+
+ExecStart=/home/k9377437/.cache/pypoetry/virtualenvs/bap-2HUybHrd-py3.11/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --timeout 180 \
+          --max-requests 1000 \
+          --max-requests-jitter 50 \
+          --bind unix:/run/gunicorn.sock \
+          business_apps.wsgi:application
+
+Restart=on-failure
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
