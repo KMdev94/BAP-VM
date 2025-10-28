@@ -1,0 +1,41 @@
+server {
+    server_name *.baplatform.pl baplatform.pl;
+
+    client_max_body_size 10M;
+    
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /var/www/business_apps/;
+    }
+    location /media/ {
+        root /var/www/business_apps/;
+    }
+    location / {
+        include proxy_params;     
+        proxy_pass http://unix:/run/gunicorn.sock:;
+            
+        proxy_connect_timeout 60s;
+        proxy_send_timeout    180s;
+        proxy_read_timeout    180s;   # must be ≥ Gunicorn’s timeout
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/baplatform.pl/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/baplatform.pl/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+
+# Redirect HTTP (port 80) requests to HTTPS and handle www redirect
+server {
+    listen 80;
+    server_name 35.184.88.161 *.perskomp.pl perskomp.pl *.baplatform.org baplatform.org *.baplatform.app baplatform.app *.baplatform.pl baplatform.pl;
+
+    # Redirect all www and non-www traffic to https://perskomp.pl
+    location / {
+        return 301 https://baplatform.pl$request_uri;
+    }
+}
