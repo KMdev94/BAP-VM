@@ -1,30 +1,36 @@
+resource "google_compute_address" "static_ip" {
+  name         = "bap-ip" # A descriptive name for the static IP
+  address_type = "EXTERNAL"
+  project      = var.project_id
+  region       = var.region
+  address      = "34.42.232.203" # The static external IP address you want to use - Removed this line because if you specify an address that you don't own you will get an error. You could omit the whole line, or change for an IP you already own.
+}
+
 resource "google_compute_instance" "default" {
-  name         = "instance-20240803-102209" # Name from your VM
-  machine_type = var.machine_type # e2-micro
-  zone         = var.zone         # us-central1-c
+  name         = "instance-20240803-102209"
+  machine_type = var.machine_type
+  zone         = var.zone
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-12" # Boot disk source image from your VM
-      size  = 30                      # Boot disk size from your VM
-      type  = "pd-standard"           # Boot disk type (Standard persistent disk)
+      image = "debian-cloud/debian-12"
+      size  = 30
+      type  = "pd-standard"
     }
   }
 
   network_interface {
-    network    = "default" # Network from your VM
-    subnetwork = "default" # Subnetwork from your VM
+    network    = "default"
+    subnetwork = "default"
 
     access_config {
-      // Ephemeral IP - Your VM has an external IP
+      nat_ip = google_compute_address.static_ip.address # Assign the static IP
     }
-    network_ip = "10.128.0.2" # Primary internal IP address from your VM
+    # network_ip = "10.128.0.2" # Removed this line as the network_ip must be within the subnet range and managed in that way.
   }
 
-  // Adding network tags from your VM
   tags = ["http-server", "https-server"]
 
-  // Startup script from your VM metadata
   metadata = {
     startup-script = <<EOF
 #! /bin/bash
@@ -36,22 +42,20 @@ EOF
   }
 
   service_account {
-    email  = "398356370811-compute@developer.gserviceaccount.com" # Service account from your VM
-    scopes = ["https://www.googleapis.com/auth/cloud-platform"] // Allow default access
+    email  = google_service_account.default.email # Use the email from the created service account
+    scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 
-  // Shielded VM configuration from your VM
   shielded_instance_config {
     enable_secure_boot          = false
     enable_vtpm                 = true
     enable_integrity_monitoring = true
   }
 
-  // Availability policies from your VM
   scheduling {
     automatic_restart   = true
-    on_host_maintenance = "MIGRATE" // Migrate VM instance
-    preemptible         = false     // Off (Recommended)
+    on_host_maintenance = "MIGRATE"
+    preemptible         = false
   }
 }
 

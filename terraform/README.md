@@ -1,6 +1,6 @@
 Before applying tf:
 
-Project ID: Make sure to provide your actual GCP project ID for the project_id variable (either directly in main.tf if you remove the variable, or through a terraform.tfvars file, or as a command-line argument).
+DONE Project ID: Make sure to provide your actual GCP project ID for the project_id variable (either directly in main.tf if you remove the variable, or through a terraform.tfvars file, or as a command-line argument).
 Service Account Permissions: The service account ( 398356370811-compute@developer.gserviceaccount.com for your existing VM, or the new gcp-vm-service-account if you are creating a new one) needs the necessary permissions to create and manage Compute Engine instances. The https://www.googleapis.com/auth/cloud-platform scope grants broad access, which is often suitable for default access.
 scripts/setup.sh : If you intend to use the metadata_startup_script = file("scripts/setup.sh") approach instead of embedding it directly, you'll need to create a scripts directory and a setup.sh file within it containing the startup script from your VM. My example embeds it directly for simplicity.
 SSH Keys: The SSH keys from your VM (like k9377437 ) are typically added after instance creation or managed through OS Login, not directly in the google_compute_instance resource block itself, unless specified in metadata. The provided startup script does create a user karol .
