@@ -1,0 +1,48 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Copy Nginx configuration
+      copy:
+        src: ../../nginx/sites-available/app.conf
+        dest: /etc/nginx/sites-available/app.conf
+      notify: Restart Nginx
+
+    - name: Enable Nginx site
+      command: nginx -s reload
+      args:
+        chdir: /etc/nginx/sites-enabled
+      notify: Restart Nginx
+
+    - name: Copy Nginx main configuration
+      copy:
+        src: ../../nginx/nginx.conf
+        dest: /etc/nginx/nginx.conf
+      notify: Restart Nginx
+
+    - name: Copy Gunicorn service file
+      copy:
+        src: ../../gunicorn/gunicorn.service
+        dest: /etc/systemd/system/gunicorn.service
+      notify: Restart Gunicorn
+
+    - name: Copy Gunicorn configuration
+      copy:
+        src: ../../gunicorn/gunicorn.conf
+        dest: /etc/gunicorn/gunicorn.conf
+
+    - name: Start Gunicorn service
+      systemd:
+        name: gunicorn
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Restart Nginx
+      systemd:
+        name: nginx
+        state: restarted
+
+    - name: Restart Gunicorn
+      systemd:
+        name: gunicorn
+        state: restarted
