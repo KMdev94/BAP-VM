@@ -6,7 +6,7 @@ resource "google_compute_address" "static_ip" {
   address      = "34.42.232.203" # The static external IP address you want to use - Removed this line because if you specify an address that you don't own you will get an error. You could omit the whole line, or change for an IP you already own.
 }
 
-resource "google_compute_instance" "default" {
+resource "google_compute_instance" "vm_instance" {
   name         = "instance-20240803-102209"
   machine_type = var.machine_type
   zone         = var.zone
@@ -33,12 +33,12 @@ resource "google_compute_instance" "default" {
 
   metadata = {
     startup-script = <<EOF
-#! /bin/bash
-adduser karol
-echo 'karol:karolpass' | chpasswd
+      #! /bin/bash
+      adduser karol
+      echo 'karol:karolpass' | chpasswd
 
-usermod -aG google-sudoers karol
-EOF
+      usermod -aG google-sudoers karol
+      EOF
   }
 
   service_account {
@@ -65,5 +65,5 @@ resource "google_service_account" "default" {
 }
 
 output "instance_ip" {
-  value = google_compute_instance.default.network_interface[0].access_config[0].nat_ip
+  value = google_compute_instance.vm_instance.network_interface[0].access_config[0].nat_ip
 }
