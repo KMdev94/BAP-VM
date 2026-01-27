@@ -1,5 +1,6 @@
+# Main server block - serves both .pl and .org
 server {
-    server_name *.baplatform.pl baplatform.pl;
+    server_name baplatform.pl www.baplatform.pl baplatform.org www.baplatform.org;
 
     client_max_body_size 10M;
     
@@ -16,62 +17,20 @@ server {
             
         proxy_connect_timeout 120s;
         proxy_send_timeout    600s;
-        proxy_read_timeout    600s;   # must be ≥ Gunicorn’s timeout
+        proxy_read_timeout    600s;
     }
 
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/baplatform.pl/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/baplatform.pl/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
-
-
-
-
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/baplatform.pl/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/baplatform.pl/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }
 
-# Redirect HTTP (port 80) requests to HTTPS and handle www redirect
+# HTTP to HTTPS redirect (preserves domain)
 server {
-    server_name 35.184.88.161 *.baplatform.org baplatform.org *.baplatform.app baplatform.app *.baplatform.pl baplatform.pl;
-
-    # Redirect all www and non-www traffic to https://perskomp.pl
-    location / {
-        return 301 https://baplatform.pl$request_uri;
-    }
-
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/baplatform.pl/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/baplatform.pl/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
-
-}
-
-
-server {
-    if ($host = www.baplatform.org) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-
-
-    if ($host = baplatform.org) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-
-
-    if ($host = www.baplatform.pl) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-
-
-    if ($host = baplatform.pl) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-
-
     listen 80;
-    server_name 35.184.88.161 *.baplatform.org baplatform.org *.baplatform.app baplatform.app *.baplatform.pl baplatform.pl;
-    return 404; # managed by Certbot
+    server_name baplatform.pl www.baplatform.pl baplatform.org www.baplatform.org baplatform.app www.baplatform.app 35.184.88.161;
+
+    return 301 https://$host$request_uri;
 }
