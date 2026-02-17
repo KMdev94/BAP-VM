@@ -6,7 +6,7 @@ After=network.target
 [Service]
 User=k9377437
 Group=www-data
-WorkingDirectory=/home/k9377437/business_apps
+WorkingDirectory=/home/k9377437/business_apps/src
 Environment="DJANGO_ENV=production"
 
 ExecStart=/home/k9377437/.cache/pypoetry/virtualenvs/bap-2HUybHrd-py3.11/bin/gunicorn \
