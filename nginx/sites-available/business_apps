@@ -25,12 +25,14 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/baplatform.pl/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    return 444;
 }
 
 # HTTP to HTTPS redirect (preserves domain)
 server {
     listen 80;
-    server_name baplatform.pl www.baplatform.pl baplatform.org www.baplatform.org baplatform.app www.baplatform.app 35.184.88.161;
+    server_name baplatform.pl www.baplatform.pl baplatform.org www.baplatform.org baplatform.app www.baplatform.app;
 
     return 301 https://$host$request_uri;
 }
